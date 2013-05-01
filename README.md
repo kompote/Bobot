@@ -1,0 +1,4 @@
+Bobot
+=====
+
+irc french bot
