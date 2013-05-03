@@ -10,7 +10,7 @@ NICK="GlandHumide"
 IDENT="kompote"
 REALNAME="Kompote"
 readbuffer=""
-channel = '#PT_IRM'
+channel = '#PT_IRM2'
 s=socket.socket( )
 s.connect((HOST, PORT))
 s.send(bytes("NICK %s\r\n" % NICK, 'utf-8'))
@@ -21,14 +21,15 @@ one = True
 bobot = bobot.Bobot()
 startup = 0
 run = True
-replyrate = 60
+replyrate = 70
 parse = False
 talk = True
 print("Starting BOBOT...")
 try:
+#    print("prout")
     bobot.load_bases()
-except(e):
-    startup = 10
+except:
+    startup = 5
     print("No bases. Learning mode during 10 passes.")
 #run = False
 def send_truc(message):
