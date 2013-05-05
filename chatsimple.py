@@ -1,7 +1,7 @@
 import sys
 import socket
 import bobot
-from random import randint
+from random import *
 from time import sleep
 
 HOST="irc.freenode.net"
@@ -10,7 +10,7 @@ NICK="GlandHumide"
 IDENT="kompote"
 REALNAME="Kompote"
 readbuffer=""
-channel = '#PT_IRM2'
+channel = '#PT_IRM'
 s=socket.socket( )
 s.connect((HOST, PORT))
 s.send(bytes("NICK %s\r\n" % NICK, 'utf-8'))
@@ -24,6 +24,9 @@ run = True
 replyrate = 70
 parse = False
 talk = True
+count = 0
+namelist=["Ta maman", "Roger", "Batman"]
+
 print("Starting BOBOT...")
 try:
 #    print("prout")
@@ -35,6 +38,26 @@ except:
 def send_truc(message):
     s.send(bytes('PRIVMSG ' + channel + " :" + message + "\r\n", 'utf-8'))
 
+def get_names():
+    print("nicknames update")
+    namelist.clear()
+    s.send(bytes('NAMES %s\r\n' % channel, 'utf-8'))
+    readbuffer=s.recv(1024)
+    readbuffer = str(readbuffer,'utf-8')
+    temp=readbuffer.split("\n")
+    
+    for line in temp:
+        line=line.rstrip()
+        line=line.split()
+        if not line:
+            continue
+        for i in range(6,len(line)):
+            if str(line[i])=="@ChanServ":
+                continue
+            namelist.append(str(line[i]).replace("@",""))            
+
+    print(namelist)
+    
 while run:
     readbuffer=s.recv(1024)
     try:
@@ -63,6 +86,7 @@ while run:
         else:
 #            print("ready.")
             one = False
+
         if '/NAMES' in line:
             continue
         if not 'PRIVMSG' in line:
@@ -77,7 +101,8 @@ while run:
             parse=True
         else:
             parse=False
-        
+        if '!names' in str(line):
+            get_names()
             
         if '!data' in str(line):
             send_truc(bobot.get_infos())
@@ -117,11 +142,22 @@ while run:
         if not talk:
             continue
 
+
         if '!rage' in str(line).lower():
             print(str(line[-1]))
+            target=""
+            get_names()
+            for nick in namelist:
+                if str(line[-1])==nick:
+                    target = nick
+                    line[-1]="#NICK"
+                    break
+
             for i in range(0,5):
                 try:
                     message = bobot.gen_phrase(str(line[-1]))
+                    if target:
+                        message = message.replace("#NICK",target)
                     sleep(.05*len(message))
                     send_truc(message)
                 except:
@@ -143,7 +179,19 @@ while run:
         if 'http:' in line:
             print("Ignoring link")
             continue
-        
+
+                
+        if count == 0:
+            get_names()
+            count = 15
+        else:
+            count-=1
+    
+        for nick in namelist:
+            print("lookin for : " + nick)
+            if nick in line:
+                line = line.replace(nick,"#NICK")
+                
         try:
             woli = bobot.parse_phrase(line,parse)
         except:
@@ -170,7 +218,9 @@ while run:
 
             if message == "":
               continue
-
+            if "#NICK" in message:
+                nick = namelist[randrange(len(namelist))]
+                message = message.replace("#NICK",nick)
             sleep(.2*len(message))
             send_truc(message)
 

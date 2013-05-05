@@ -17,31 +17,35 @@ class Bobot():
         self.lastword = "l'anus"
 
     def save_bases(self):
-        print("Saving Bases...")
+        print("Saving Bases..." + str(self.datapair))
         file = open('datapair.bin','w')
         for i in self.datapair:
             #file.write(" ".join(str(i))+"\n")
-            file.write(i[0] + " " + i[1]+ " " + i[2] + "\n")
+#            print(str(i))
+            file.write(str(i[0]) + u" " + str(i[1])+ u" " + str(i[2]) + u"\n")
+#            file.write(str(i))
         file.close()
         """
         file = open('database.bin','w')
         for i in self.database:
             file.write(str(i) + "\n")
         file.close()
-        print("Done.")
         """
+        print("Done.")
+        
         
     def load_bases(self):
         print("Load Bases...")
         self.database = []
         self.datapair = []
-        file = open('datapair.bin','rb')
+        file = open('datapair.bin','r')
         print("Load datapair...")
         lines = file.readlines()
 #        print("Load datapair...1")
         for line in lines:
             tmp = line.split()
-            self.datapair.append([tmp[0].decode('latin-1','ignore'),tmp[1].decode('latin-1','ignore'),tmp[2].decode('latin-1','ignore')])
+            self.datapair.append([tmp[0],tmp[1],tmp[2]])
+#            self.datapair.append([tmp[0].decode('latin-1','ignore'),tmp[1].decode('latin-1','ignore'),tmp[2].decode('latin-1','ignore')])
 #            print(line.decode('latin-1','ignore'))
 #        print("Load datapair...2")
         file.close()
@@ -66,7 +70,7 @@ class Bobot():
         return message
     
     def parse_phrase(self, message, parse):
-#        message=message.
+    #    message=message
         print(" Parsing : " + message)
         #message = message.encode('utf-8')
         if len(message) < 4 :
@@ -252,6 +256,12 @@ if __name__ == "__main__":
         print("Tu veux de l'aide? Ta mere en string.")
         sys.exit(0)
     start = 3
+    """
+    f = open("texte",'r')
+    for line in f:
+        bb.parse_phrase(line,True)
+    f.close()
+    """
     while True:
         foo=input("? ")
         if foo == "!q":
@@ -264,6 +274,18 @@ if __name__ == "__main__":
             for t in bb.datapair:
                 print(str(t))
             continue
+        if foo == "!save ":
+            bb.save_bases()
+            print("Bases saved")
+            continue
+        if foo == "!load ":
+            bb.load_bases()
+            print("Bases loaded")
+            continue
+        if foo == "!print ":
+            print(bb.datapair)
+            continue
+
         mess=bb.parse_phrase(foo,True)
         if  start>0:
             start-=1
